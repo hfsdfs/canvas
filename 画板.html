@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="画板.css"/>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<script src="//at.alicdn.com/t/font_529130_3lx7ktdnot46ajor.js">
+			
+		</script>
+		<script src="//at.alicdn.com/t/font_529316_etejx4og6869a4i.js">
+			
+		</script>
+		<style type="text/css">
+		    .icon {
+		       width: 1em; height: 1em;
+		       vertical-align: -0.15em;
+		       fill: currentColor;
+		       overflow: hidden;
+		    }
+		</style>
+		<canvas id="xxx" width="300" height="300"></canvas>
+		<div id="actions"  class="actions">
+			<svg id="pen" class="icon" aria-hidden="true">
+			    <use xlink:href="#icon-pen"></use>
+			</svg>
+			<svg id="eraser" class="icon" aria-hidden="true">
+			    <use xlink:href="#icon-erase"></use>
+			</svg>	
+			<svg id="clear" class="icon" aria-hidden="true">
+		    	<use xlink:href="#icon-clear"></use>
+			</svg>
+			<svg id="download" class="icon" aria-hidden="true">
+		    	<use xlink:href="#icon-save"></use>
+			</svg>
+		</div>
+		<ol class="colors">
+			<li id="red" class="red"></li>
+			<li id="green" class="green"></li>
+			<li id="blue" class="blue"></li>
+			<li id="black" class="black"></li>
+		</ol>
+		<ol class="sizes">
+			<li id="thin" class="thin"></li>
+			<li id="thick" class="thick"></li>
+		</ol>
+		<script type="text/javascript">
+			var yyy = document.getElementById('xxx')
+			var context = yyy.getContext('2d')
+			var lineWidth = 5 
+			autoSizeCanvas(yyy)
+			listenToUser(yyy)
+			/**********************************************/
+			var eraserEnabled = false
+			pen.onclick = function(){
+				eraserEnabled = false
+				pen.classList.add('active')
+				eraser.classList.remove('active')
+				
+			}
+			eraser.onclick = function(){
+				eraserEnabled =true
+				eraser.classList.add('active')
+				pen.classList.remove('active')
+			}
+			clear.onclick = function(){
+				context.clearRect(0,0,yyy.width,yyy.height)
+			}
+			
+			download.onclick = function(){
+				var url = yyy.toDataURL("image/png")
+				var a = document.createElement('a')
+				document.body.appendChild(a)
+				a.href = url
+				a.download = 'xxxx'
+				a.click()
+			}
+			
+			red.onclick = function(){
+				context.fillStyle = 'red'
+				context.strokeStyle = 'red'
+			}
+			green.onclick = function(){
+				context.fillStyle = 'green'
+				context.strokeStyle = 'green'
+			}
+			blue.onclick = function(){
+				context.fillStyle = 'blue'
+				context.strokeStyle = 'blue'
+			}
+			black.onclick = function(){
+				context.fillStyle = 'black'
+				context.strokeStyle = 'black'
+			}
+			thin.onclick = function(){
+				lineWidth = 5
+			}
+			thick.onclick = function(){
+				lineWidth = 10
+			}
+			/*************************************/
+			function autoSizeCanvas(canvas){
+					setCanvasSize()
+				window.onresize = function(){
+					setCanvasSize()
+				}
+				function setCanvasSize(){
+					var pageWidth = document.documentElement.clientWidth
+					var pageHeight = document.documentElement.clientHeight
+					canvas.width = pageWidth
+					canvas.height = pageHeight
+				}
+			}
+			/**********************************************************/
+			function drawCircle(x,y,radius){
+				context.beginPath()
+				context.fill = 'black'
+				context.arc(x,y,radius,0,Math.PI*2)
+				context.fill()
+			}
+			//让两个点成一条线
+			function drawLine(x1,y1,x2,y2){
+			context.beginPath();
+			context.moveTo(x1,y1)//起点
+			context.lineWidth = lineWidth
+			context.lineTo(x2,y2)//终点
+			context.stroke()
+			context.closePath()
+			}
+			/***********************************************************/
+			function listenToUser(canvas){
+				var using = false
+				var lastPoint = {x:undefined, y:undefined}
+				if(document.body.ontouchstart !== undefined){
+					canvas.ontouchstart = function(aaa){
+						var x = aaa.touches[0].clientX
+						var y = aaa.touches[0].clientY
+						console.log(x,y)
+						using = true
+						if(eraserEnabled){
+							context.clearRect(x-5,y-5,10,10)
+						}else{
+							lastPoint = {"x":x, "y":y}
+						}	
+					}
+					canvas.ontouchmove = function(aaa){
+						console.log("dongle")
+						var x = aaa.touches[0].clientX
+						var y = aaa.touches[0].clientY
+						if(!using){return}
+						if(eraserEnabled){
+								context.clearRect(x-5,y-5,10,10)
+						}else{
+							var newPoint = {"x":x, "y":y}
+							drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
+							lastPoint = newPoint
+						}
+					}
+					
+					canvas.ontouchend = function(){
+						console.log("jieshu")
+						using = false
+							}
+						}else{
+							canvas.onmousedown = function(aaa){
+							var x = aaa.clientX
+							var y = aaa.clientY
+							using = true
+							if(eraserEnabled){
+								context.clearRect(x-5,y-5,10,10)
+							}else{
+								lastPoint = {"x":x, "y":y}
+								}	
+							}
+					
+					canvas.onmousemove = function(aaa){
+						var x = aaa.clientX
+						var y = aaa.clientY
+						if(!using){return}
+						if(eraserEnabled){
+								context.clearRect(x-5,y-5,10,10)
+						}else{
+							var newPoint = {"x":x, "y":y}
+							drawLine(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
+							lastPoint = newPoint
+						}
+					}
+			canvas.onmouseup = function(aaa){
+				 using = false
+			}
+				}
+			}
+		</script>
+	</body>
+</html>
